@@ -3,7 +3,6 @@ import pandas as pd
 import json
 import matplotlib.pyplot as plt
 
-
 def main(argv):
    inputfile = ''
    outputfile = ''
@@ -21,15 +20,19 @@ def main(argv):
       elif opt in ("-o", "--ofile"):
          outputfile = str(argv[3])
    print('Input file is "', inputfile)
-   df = pd.read_json(inputfile)
-   df["fechaHora"]=pd.to_datetime(df["fechaHora"])
-   df=df[['fechaHora','ultimoPrecio']]
-   df.set_index('fechaHora')
-   df = df.sort_index()
-   #dt=dt.set_index(pd.DatetimeIndex(dt['fechaHora']))
-   df.to_csv(str(outputfile))
+   df = pd.read_csv(inputfile)
+   df=df[['fechaHora','ultimoPrecio',]]
+   df=df.set_index(pd.DatetimeIndex(df['fechaHora']))
+   df.plot()
+   plt.title("timeseries: "+inputfile)
+   plt.xlabel("time")
+   plt.ylabel("AR$ ")
+   plt.grid()
+   plt.savefig(outputfile)
    print('Output file is "', outputfile)
 
 
 if __name__ == "__main__":
    main(sys.argv[1:])
+
+
