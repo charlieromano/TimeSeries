@@ -29,3 +29,8 @@ Output file is " ../Pics/RIGO.png
 
 <img src="Pics/RIGO.png">
 
+Decomposition
+
+additive vs. multiplicative
+
+ARMA
