@@ -7,6 +7,7 @@ N = 100000
 mu, sigma = 0, 0.1
 bins = 25
 degFreedom = 9
+col=0
 
 # random values data series
 X = np.random.normal(mu, sigma, N)
@@ -32,8 +33,26 @@ df=pd.DataFrame({'X':X,'Y':Y})
 df.plot()
 plt.show()
 
+# comparing timeseries
+## timeseries
+fig, (ax1, ax2) = plt.subplots(2)
+fig.subtitle('X vs. Y timeseries')
+ax1.plot(X)
+ax2.plot(Y)
+plt.show()
+## histograms
+fig, (ax1, ax2) = plt.subplots(2)
+fig.subtitle('X vs. Y timeseries')
+ax1.hist(X,bins=30)
+ax2.hist(Y,bins=20)
+plt.show()
+## stats
+df.X.describe
+df.Y.describe()
+dt = pd.DataFrame(df.X.describe())
+dt=pd.concat([df.X.describe(), df.Y.describe()],axis=1)
+
 # adding datetime index
-col=0
 time = pd.date_range('2021-10-08', periods=N, freq='s')
 df.insert(col,"Datetime", time, True)
 df.set_index('Datetime')
