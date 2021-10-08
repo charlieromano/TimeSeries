@@ -1,5 +1,59 @@
 [
     {
+        "ultimoPrecio": 185.40000000,
+        "variacion": 0.0,
+        "apertura": 184.00000000,
+        "maximo": 188.95000000,
+        "minimo": 182.00000000,
+        "fechaHora": "2021-06-29T17:00:01.71",
+        "tendencia": "sube",
+        "cierreAnterior": 0.0,
+        "montoOperado": 45050758.95000000,
+        "volumenNominal": 242137,
+        "precioPromedio": 0.0,
+        "moneda": "peso_Argentino",
+        "precioAjuste": 0.0,
+        "interesesAbiertos": 0.0,
+        "puntas": null,
+        "cantidadOperaciones": 0
+    },
+    {
+        "ultimoPrecio": 184.50000000,
+        "variacion": 0.0,
+        "apertura": 190.00000000,
+        "maximo": 190.00000000,
+        "minimo": 184.20000000,
+        "fechaHora": "2021-06-28T17:00:03.597",
+        "tendencia": "sube",
+        "cierreAnterior": 0.0,
+        "montoOperado": 20522988.35000000,
+        "volumenNominal": 109977,
+        "precioPromedio": 0.0,
+        "moneda": "peso_Argentino",
+        "precioAjuste": 0.0,
+        "interesesAbiertos": 0.0,
+        "puntas": null,
+        "cantidadOperaciones": 0
+    },
+    {
+        "ultimoPrecio": 190.60000000,
+        "variacion": 0.0,
+        "apertura": 188.00000000,
+        "maximo": 191.45000000,
+        "minimo": 185.20000000,
+        "fechaHora": "2021-06-25T17:00:02.383",
+        "tendencia": "sube",
+        "cierreAnterior": 0.0,
+        "montoOperado": 32732109.15000000,
+        "volumenNominal": 173507,
+        "precioPromedio": 0.0,
+        "moneda": "peso_Argentino",
+        "precioAjuste": 0.0,
+        "interesesAbiertos": 0.0,
+        "puntas": null,
+        "cantidadOperaciones": 0
+    },
+    {
         "ultimoPrecio": 191.45000000,
         "variacion": 0.0,
         "apertura": 193.45000000,
@@ -49823,4 +49877,4 @@
         "puntas": null,
         "cantidadOperaciones": 0
     }
-
+]

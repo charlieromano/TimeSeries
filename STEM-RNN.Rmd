@@ -1,0 +1,316 @@
+---
+title: "Redes neuronales para dimensionar Capacidad STEM-RNN"
+author: "Autores: Carlos Germán Carreño Romano, Natalia Clivio"
+output: 
+  html_document: 
+    fig_caption: yes
+fontsize: 11pt
+geometry: margin=1in
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Trabajo publicado en IEEE ARGENCON 2018, 6 al 8 de Junio, Tucumán, Argentina.
+
+##Introducción
+
+El dimensionamiento de la capacidad de red es un problema importante en proveedores de servicios de comunicaciones (CSP) ya que involucra grandes inversiones anuales, especialmente en las redes de acceso. Los métodos de previsión de la demanda se basan fuertemente en mediciones. En este trabajo abordamos una comparación entre **métodos estadísticos** y de **aprendizaje automático** para estimar la previsión de la demanda a largo plazo.
+
+A nivel de red, el flujo de datos comienza y termina en el usuario, desde el punto de acceso más cercano y a través de alguna red de acceso (coaxil, cobre, fibra, aire) hasta la red de transporte y core donde se rutea al servidor de contenidos más cercano. Este es el esquema actual más común hoy día para los **CSP**.
+
+![red](NetworkDiagrams.png)
+
+**Fig.1:** Diagrama de la red de servicios de comunicaciones.
+
+Podemos identificar elementos bien marcados:
+
+* Red de acceso móvil: 2G/3G/4G
+* Red de acceso fijo: DOCSIS HFC, ADSL 
+* Red de transporte y core: Backbone, Red Centurión
+* Red de distribución de contenidos: CDNs Google, CDN Netflix, CDN Facebook, CDN Flow
+* Internet
+
+El problema de aprovisionar capacidad en la red se divide entonces en varias capas: los órdenes de magnitud van desde algunos Megas a nivel usuario, algunos cientos de Megas a nivel nodo, hasta algunos Teras en el core. La distibución geográfica y los distintos perfiles de usuario agregan más complejidad al análisis del consumo. 
+
+Si bien a nivel Arquitectura hay componentes bien distintos, en este trabajo nos concentramos en los servicios de core de la red HFC DOCSIS de acceso fijo. Estos se representan en la figura 2 y corresponden mayormente a servicios de Caching y Peering de **CDNs**.
+
+
+![red2](NetworkDiagrams2.png)
+
+**Fig. 2:** Diagrama de distribución principal del tráfico de datos en la red de Telecom Argentina.
+
+Tanto Google, Netflix, Facebook, Akamai y Flow tienen granjas de servidores en los datacenters de Telecom Argentina. Estos servicios corren algoritmos a diario que permiten, durante la noche, recargar los servidores con los contenidos más populares para que estén disponibles al día siguiente más cerca del usuario. A esto se le llama **Caching**. Y además, algunos proveedores de servicios de internet que no tienen granjas propias, en vez de salir a Internet a buscar los contenidos los consumen de una CDN local, por ejemplo una de Telecom. De esta manera se evitan pagar tráfico internacional. A esto llamamos **Peering**. 
+
+En la siguiente imagen vemos el perfil de tráfico diario de los servicios mencionados a nivel de core para la semana del 2 al 7 de Diciembre de 2017. Observar que cerca de las 23hs se alcanza el pico de tráfico... ¿coincide con tu perfil de uso de video?
+
+
+
+![trafico](traficoTotalInternet2017_peak.png)
+
+**Fig. 3:** Gráfica de mediciones de las CDNs y los peerings. Cada color representa una serie de tiempo distinta apilada en forma de área. Corresponde a la semana del 2-7 de Diciembre de 2017 con 5 minutos de granularidad.
+
+## Metodología
+
+Ahora vamos a ver cómo estudiamos, modelamos y hacemos estimaciones de crecimiento trabajando con dos aproximaciones: una clásica que se llama **ARIMA** (Autoregresive Integrated Moving Average) y otra moderna de redes neuronales que se llama **LSTM** (Long Short Term Memory).
+
+### Predicción con metodos estadisticos
+
+El enfoque estadístico clásico para el estudio de series temporales es una combinación de los procesos Autoregresivos (AR) y de Promedio móvil (MA). ARIMA es una extensión que incluye modelos de media móvil.
+
+Para aplicar modelos ARIMA se suele descomponer la serie, analizando en primer lugar la **tendencia** de la serie, luego la **estacionalidad** y concentrándose en identificar estas componentes filtradas. Hay otras dos componentes que hacen el modelo completo y son las **componentes cíclicas** y las **componentes aleatorias**. El proceso consiste en la descomposición de la serie en forma aditiva o multiplicativa. Usamos en este trabajo la forma aditiva y definimos entonces una serie de tiempo Y(t) como:
+
+\begin{equation}
+Y(t) = T(t) + S(t) + C(t) + e(t)
+\label{eq.1: Y(t)decomposition}
+\end{equation}
+
+para tiempo contínuo y una serie de tiempo discreto Yt como:
+
+\begin{equation}
+Y_t = T_t + S_t + C_t + e_t
+\label{eq.2 Y[t]discrete}
+\end{equation}
+
+donde para la serie de tiempo discreta se define un período de muestro T que cumpla que:
+
+\[Y = \left\lbrace  Y_t: t \epsilon T \right\rbrace\]
+
+donde:
+
+* T(t): Tendencia
+* S(t): Variación Estacional
+* C(t): Componente Cíclica
+* e(t): Componente aleatoria
+
+Si usamos el operador de backshift definido por:
+
+\begin{equation}
+B^{\alpha}z_t = z_{t_\alpha}
+\label{eq.Backshift}
+\end{equation}
+
+con las convenciones:
+
+\begin{equation}
+\phi(z) = 1 - \phi_1 z - ... - \phi_q z^p
+\label{eq.conv1}
+\end{equation}
+\begin{equation}
+\theta(z) = 1 - \theta_1z - ... - \theta_qz^q
+\label{eq.conv2}
+\end{equation}
+
+entonces podemos definir un proceso ARMA acorde a:
+
+\begin{equation}
+\phi(B)x_t = \theta(B) e_t
+\label{eq.ARMA}
+\end{equation}
+
+
+Como es común, las series de tiempo x(t) son no-estacionarias y entonces hay varias aproximaciones para obtener una serie con forma cuasi-estacionaria. Para dar un ejemplo, por diferenciación:
+
+\begin{equation}
+y_t = [1-B]^d x_t
+\label{eq.ARIMA1}
+\end{equation}
+\begin{equation}
+\phi(B)y_t = \theta(B)e_t
+\label{eq.ARIMA2}
+\end{equation}
+
+Entonces definimos de esta manera un modelo **ARIMA(p,d,q)**.
+
+Tenemos ahora un **modelo matemático** con tres parámetros: p, d y q, que nos permite interactuar con la forma de la serie. Implementando esto en un lenguaje de programación usamos estas componentes, el modelo ARIMA y jugamos con los parámetros para hacer predicciones. En la figura que sigue se muestran los resultados de los pronósticos para distintos juegos de parámetros (p,d,q).
+
+
+
+
+```{r series, echo=FALSE}
+inputPanel(
+  selectInput("i_series", label = "Pronostico para el Servicio:",
+              choices = c("Google", "Netflix", "Verizon", "Akamai","Total"), selected = "Google")
+  )
+renderImage({
+  filename=paste0('forecast', input$i_series,'.png')
+  list(src=filename)
+}, deleteFile = FALSE)
+
+       
+```
+
+**Fig. 4:** Pronósticos de crecimiento de tráfico usando ARIMA con distintos juegos de parámetros (p,d,q). En naranja la serie de los picos, en azul la serie pronosticada a futuro y en gris los intervalos de confianza.
+
+Podemos ver que el método es adecuado para representar tendencia, pero que cuando nos vamos muy adelante en el tiempo los márgenes de error aumentan bastante. Además, si usamos parámetros mayores a 2 la forma ya se vuelve distinta de la que observamos.
+
+Vamos ahora a estudiar brevemente y aplicar otro método.
+
+
+## Predicción con Redes Neuronales
+
+Las redes neuronales son métodos de aprendizaje automático no supervisado que se basan en representar las abstracciones de datos para construir modelos computacionales. Las **redes neuronales recurrentes** (RNN) son un conjunto de arquitecturas se varias capas que se basan en un modelo de estado con recurrenci, es decir que el estado actual depende del estado anterior. En términos matemáticos decimos que el estado S en el tiempo t es una función del estado S en el tiempo t-1:
+
+
+
+\[s_t = f_\theta (S_{t-1})\]
+
+Gráficamente podemos representar la función f que se aplica al estado S en tiempo t-1 y alcanza S en t, o que se aplica a S en t y alcanza S en t+1:
+
+![RNN1](NeuralNet1.png)
+
+**Fig. 5:** Grafo que representa un sistema recurrente. La variable de estado St es función de St-1 y alimenta al estado St+1.
+
+En la figura 6 mostramos el grafo de una red neuronal recurrente llamada Vanilla, y su representación abierta equivalente, que es más usual en **Deep Learning**. En este caso cada función asociada a una arista es una matriz de pesos U, V o W para los distintos tipos de conexiones entre capas: entrada-oculta, oculta-salida o bien oculta-oculta respectivamente. Se suelen armar varias capas entre input-output dependiendo el problema a resolver.
+
+
+![RNN](LSTM.png)
+**Fig. 6:** Red neuronal recurrente Vanilla. A la izquierda la notación de recurrencia; a la derecha la notación abierta. La función f de la figura anterior ahora se representa por las matrices U,V y W. La entrada Xi alimenta el estado Si y computa la variable objetivo oi para cada instante de tiempo i.
+
+Si se asume que las activaciones no lineales entre neuronas son de tipo arctan() en las capas escondidas y de tipo softmax() en la salida, entonces las ecuaciones que describen esta arquitectura son:
+
+\[ a_t = b + W\cdot{s_{t-1}} + U\cdot x_t   \]
+\[ s_t = \tan^-1 (a_t)   \]
+\[ o_t = c + V\cdot s_t \]
+\[ p_t = softmax (o_t) \]
+
+
+con b,c los vectores de parámetros de sesgo con las matrices de pesos U, V y W. Softmax() es una operación que se define como:
+
+\[ softmax: \mathbb{R}^k \rightarrow [0,1]^k\]
+\[ softmax(x)_j=\frac{e_j^x}{\sum_{k=1}^Ke^{x_k}}\]
+
+Con un poco más de complejidad aparecen más arquitecturas. **LSTM** en particular introduce la noción de **celdas de memoria**, donde cada celda consiste en una serie de estados que permiten tener una memoria de corto y largo plazo, a través de 3 compuertas: **entrada, salida y olvido*. 
+
+
+![LSTM](LSTMcell.png)
+
+
+**Fig. 7:** Celda de memoria de la arquitectura LSTM. El estado interno Sc tiene activación lineal y puede ser reseteado por una compuerta de salida, mientras presenta recurrencia. La compuerta de entrada y de salida permite acceder a la variable de estado.
+
+El estado interno de una conexión recurrente tiene un lazo de realimentación con un paso de delay. Esta unidad es lineal a diferencia de las compuertas que son no lineales. Las celdas de memoria manejan también las 3 compuertas multiplicativas a través de funciones g y h que escalan valores normalemente en los intervalos (0, 1) o (-1, 1). Un bloque LSTM puede tener varias de estas celdas de memoria interconetadas. A estas compuertas se pueden conectar también otras redes.
+
+En términos analíticos, si definimos la j-ésima celda de memoria Cj de la siguiente x tenemos que:
+
+
+\[y^{out_j}(t) = f_{out_j}(x_{out_j}(t))\]
+
+
+\[y^{in_j}(t) = f_{in_j}(x_{in_j}(t))\]
+
+
+\[x^{out_j}(t) = \sum_u w_{out_j}u\cdot y^u(t-1)\]
+
+
+\[x^{in_j}(t) = \sum_u w_{in_j}u\cdot y^u(t-1)\]
+
+y también:
+
+
+\[x_{c_j}(t)=\sum_u  w_{c_j}u\cdot y^u(t-1) \]
+
+Los subíndices i,j de las variables de peso w representan el peso de la arista que va desde i hasta j. En un instante de tiempo t, la velda de salida cj es:
+
+\[y^{c_j}(t)=y^{out_j}(t)\cdot h(s_{c_j}(t)) \]
+
+donde s(t) es el estado interno de la celda que satisface las condiciones:
+
+\[s_{c_j}(0)=0\]
+\[s_{c_j}(t) = y^{\phi_j}(t)s_{c_j}(t-1)+y^{in_j}(t)g(x_{c_j}(t))\]
+
+para todo tiempo t>0; g es una función diferenciable que escala en el intervalo (-1, 1) y h es una función diferenciable que escala la alida de la celda computada desde el estado interno s.
+
+### Entrenamiento de la red neuronal
+
+A una red neuronal hace falta entrenarla. En terminología de redes neuronales, los parámetros de control se llaman *hyperparameters*. Ahora estos parámetros son muchos más que los (p,d,q) del modelo ARIMA, y el arte de encontrar el valor de compromiso entre los hyperparámetros es el que se lleva la mayor parte del tiempo. Algunos parámetros que logramos ajustar adecuadamente son:
+
+* dimensiones de entrada/salida
+* batch: tamaño de muestras que son propaadas a la red en cada iteración
+* epochs: máxima cantidad de veces que el modelo itera a través de un algoritmo de aprendizaje
+* función de pérdida: es la medida de performance del algoritmo que hay que minimizar
+* algoritmo de optimización: es el método para minimizar la función de pérdida
+* función de activación: define la salida de un nodo
+
+En la siguientes gráficas podemos ver medidas de performance de la red en la etapa de entrenamiento.
+
+```{r neurals, echo=FALSE}
+inputPanel(
+  selectInput("i_metric", label = "Medida de entrenamiento:",
+              choices = c("train_validation", "testvspreds", "testvspredsZoom","LSTMresults"), selected = "testvspreds")
+  )
+renderImage({
+  filename=paste0(input$i_metric,'.png')
+  list(src=filename)
+}, deleteFile = FALSE)
+
+
+
+
+```
+
+
+
+
+
+
+
+Estos resultados muestran que el ajuste por redes neuronales es muy acertado, que el aprendizaje se alcanza para este tipo de series en no más de 4 iteraciones y que se pueden hacer pronósticos punto a punto muy exactos. Sin embargo, por el método de ventana deslizante la proyección a largo plazo no logra capturar (en las pruebas realizadas) las componentes de tendencia.
+
+
+
+
+## Discusion
+
+El objetivo del proceso de predicción y del proceso de planificación es diseñar y dimensionar la red basandose en arquitecturas que soporten el transporte de tráfico de usuarios, como también la estrategia de protección y recuperación ante fallas.
+
+Hemos visto que el trabajo con series de tiempo sugiere como importante guardar valores históricos, tanto mensuales como diarios con la mayor historia posible para poder ver componentes estacionales además de tendencia.
+
+Vimos que con ARIMA se requiere reducir el tamaño de las muestras para trabajar con los picos, mientras que con LSTM es requerimiento disponer de grandes volúmenes de datos para entrenamiento. Esta es una relación de compromiso: si el proceso de tomar mediciones es caro, entonces habrá que utilizar métodos estadísticos; si se puede disponer de muchas mediciones, entonces podemos aplicar redes neuronales.
+
+Por otro lado, las ventajas de trabajar con picos y ARIMA permite hacer pronósticos de largo plazo, mientras con LSTM se puede predecir minuto a minuto pero para un período inmediatamente siguiente. 
+
+## Agradecimientos
+
+Particulares gracias a los equipos de STEM (Science, Technology Engineering and Mathematics), PI (Planificación e Implementación) y BackEnd por el espacio y tiempo dedicado a este trabajo, por la participación y permanente contribución y el desarrollo de plataformas de medición.
+
+
+
+## Referencias
+
+
+
+* [1] J. Villavicencio. “Manual Introducción a Series de Tiempo”.
+Instituto de Estadísticas de Puerto Rico. url:
+http://www.estadisticas.gobierno.pr/iepr/LinkClick.aspx?fileticket=4
+_BxecUaZmg%3D . [Accesed: 1/12/2017].
+
+* [2] Hyndman, R.J. and Athanasopoulos, G. (2014) "Forecasting:
+principles and practice", OTexts. Section 2.5 "Evaluating forecast
+accuracy".
+
+
+* [3] G. Kitagawa, ‘Introduction to Time Series Modeling’, 2010.
+
+* [4] Análisis de Series de Tiempo
+
+* [5] R. Chrobok, ‘Theory and Application of Advanced Traffic Forecast
+Methods’, PhD thesis, University Duisburg-Essen. 2005. url:
+ht tps://duepublico.uni-duisburg-essen.de/servlets/DerivateServlet/D
+erivate-5656/Chrobokdiss.pdf
+
+* [6] I. Goodfellow, Y. Bengio, A. Courville, ‘Deep Learning’, 2016, ch.5-11.
+
+* [7] R. van de Meent, “Network Link Dimensioning — A Measurement
+and Modeling-based Approach,” Ph.D. thesis, Univ. of Twente,
+2006. url: http://purl.org/ utwente/56434
+
+* [8] S. Hochreiter, J. Schmidhuber, ‘Long short-term memory’, Neural Computation, 1997.
+
+* [9] F. A. Gers, J. Schmidhuber, F. Cummins, ‘Learning to Forget: Continual Prediction with LSTM’, Technical Report IDSIA-01-99, 1999.
+
+* [10] J. Dean, S. Ghemawat, ‘MapReduce: Simplified Data Processing on
+Large Clusters’, Google Inc., 2004. url:
+https://static.googleusercontent.com/media/research.google.com/en//
+archive/mapreduce-osdi04.pdf
