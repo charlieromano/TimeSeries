@@ -18,3 +18,13 @@ $$
 $$
 y se denomina ***autocovarianza*** de la serie de tiempo $y_n$.
 
+
+
+Función de autocorrelación
+$$
+\rho
+$$
+
+
+Coeficiente de correlación
+
