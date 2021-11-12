@@ -60,6 +60,17 @@ ts=pd.DataFrame(dataframe.values)
 rows=int(len(ts)/N)
 data = ts.values.reshape(rows,N)
 
+betas=data.mean(axis=0)
+plt.plot(betas)
+plt.plot(data[sample,:])
+plt.plot(data[sample,:]-betas)
+plt.legend(['betas','data','data-betas'])
+plt.show()
+
+#####################################################################
+## repetir para todo el largo de la serie
+#####################################################################
+
 est=np.tile(betas,rows)
 
 plt.plot(sig)
