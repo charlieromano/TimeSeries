@@ -1,5 +1,6 @@
 # fit an ARIMA model and plot residual errors
 import pandas as pd
+import matplotlib.pyplot as plt
 from pandas import datetime
 from pandas import read_csv
 from pandas import DataFrame
@@ -17,6 +18,11 @@ ts.fechaHora=pd.to_datetime(ts.fechaHora).dt.date
 ts.fechaHora=pd.DatetimeIndex(ts.fechaHora)
 ts=ts.sort_index(ascending=False)
 
+plt.plot(ts.fechaHora, ts.ultimoPrecio)
+plt.legend(["ultimoPrecio"])
+plt.grid()
+plt.show()
+
 # fit model
 model = ARIMA(ts.ultimoPrecio.values, order=(5,1,0))
 model_fit = model.fit()
@@ -25,10 +31,10 @@ print(model_fit.summary())
 # line plot of residuals
 residuals = DataFrame(model_fit.resid)
 residuals.plot()
-pyplot.show()
+plt.show()
 # density plot of residuals
 residuals.plot(kind='kde')
-pyplot.show()
+plt.show()
 # summary stats of residuals
 print(residuals.describe())
 
@@ -54,6 +60,6 @@ for t in range(len(test)):
 rmse = sqrt(mean_squared_error(test, predictions))
 print('Test RMSE: %.3f' % rmse)
 # plot forecasts against actual outcomes
-pyplot.plot(test)
-pyplot.plot(predictions, color='red')
-pyplot.show()
+plt.plot(test)
+plt.plot(predictions, color='red')
+plt.show()
