@@ -50,6 +50,29 @@ $$
 \Psi_j = \phi^j
 $$
 
+#### Ejemplo
+
+```python
+# AR(2)
+N=1000
+a1=0.4
+a2=0.35
+x=np.arange(2)
+e_t=np.random.normal(0,1)
+y=np.append(x,a1*x[1]+a2*x[0]+e_t)
+
+for i in range(N):
+   e_t=np.random.normal(0,1)
+   y=np.append(y,a1*y[-1]+a2*y[-2]+e_t)
+
+
+y.mean()
+y.std()
+plt.plot(y);plt.show()
+
+```
+
+![](../Pics/ar_2.png)
 
 ### MA models
 
@@ -85,6 +108,30 @@ $$
 \end{cases}
 $$
 
+#### Ejemplo
+
+```python
+# MA(1)
+N =1000
+b1 =0.25
+e_t0 = np.random.normal(0,1)
+e_t1 = np.random.normal(0,1)
+y = np.append(e_t0,b1*e_t0+e_t1)  # y1 = b1*e_t0+e_t1
+
+for i in range(N):
+   e_t0 = e_t1
+   e_t1 = np.random.normal(0,1)
+   y = np.append(y,b1*e_t0+e_t1)
+
+
+y.mean()
+y.std()
+plt.plot(y);plt.show()
+
+```
+
+![](../Pics/ma_1.png)
+
 
 
 
@@ -102,4 +149,32 @@ $$
 $$
 y_t = \sum_{i=1}^pa_iy_{t-i} + \sum_{j=1}^q b_i\epsilon_{t-i} + \epsilon_t
 $$
+
+#### Ejemplo
+
+
+
+```python
+#ARMA
+
+N=10000
+a1=0.4
+a2=0.3
+b1 =-0.3
+
+x=np.arange(2)
+e_t=np.random.normal(0,1)
+y=np.append(x,a1*x[1]+a2*x[0]+e_t)
+
+for i in range(N):
+   e_0 = e_t
+   e_t=np.random.normal(0,1)
+   y=np.append(y,a1*y[-1]+a2*y[-2]+ b1*e_0 + e_t)
+
+
+y.mean()
+y.std()
+#plt.plot(y);plt.show()
+
+```
 

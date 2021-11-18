@@ -45,7 +45,7 @@ plt.show()
 
 
 
-![](/home/charlieromano/Downloads/TimeSeries/Pics/Linear_trend.png)
+![](../Pics/Linear_trend.png)
 
 #### Modelo AR(1)
 
@@ -60,7 +60,7 @@ ar1_res = ar1.fit()
 print(ar1_res.summary())
 ```
 
-![](/home/charlieromano/Downloads/TimeSeries/Pics/ar1_res.png)
+![](../Pics/ar1_res.png)
 
 
 
@@ -73,7 +73,7 @@ legend = ax.legend(loc="upper left")
 plt.show()
 ```
 
-![](/home/charlieromano/Downloads/TimeSeries/Pics/ar1_predict.png)
+![](../Pics/ar1_predict.png)
 
 #### Resultados
 
@@ -108,27 +108,53 @@ plt.legend(['$Y_t$','$\mu_t$'])
 plt.show()
 ```
 
-![](/home/charlieromano/Downloads/TimeSeries/Pics/ciclic_trend.png)
+![](../Pics/ciclic_trend.png)
 
-#### Mddelo ARMA(1,1)
+#### Modelo ARMA(2,1)
 
 
 
 ```python
-ar1 = ARIMA(Y, order=(2, 0, 2), trend="n")
-ar1_res = ar1.fit()
-print(ar1_res.summary())
+#ARMA
 
-fig, ax = plt.subplots(figsize=(10, 8))
-fig = plot_predict(ar1_res, start=1,end=2*N, ax=ax)
-plt.plot(Y)
-legend = ax.legend(loc="upper left")
-plt.show()
+N=10000
+a1=0.4
+a2=0.3
+b1 =-0.3
+
+x=np.arange(2)
+e_t=np.random.normal(0,1)
+y=np.append(x,a1*x[1]+a2*x[0]+e_t)
+
+for i in range(N):
+   e_0 = e_t
+   e_t=np.random.normal(0,1)
+   y=np.append(y,a1*y[-1]+a2*y[-2]+ b1*e_0 + e_t)
+
+
+y.mean()
+y.std()
+plt.plot(y);plt.show()
+
 ```
 
 
 
 #### Predicción 
+
+```python
+# Predict
+y_arma = ARIMA(y, order=(2, 0, 1))
+y_arma_res = y_arma.fit()
+print(y_arma_res.summary())
+
+fig, ax = plt.subplots(figsize=(10, 8))
+fig = plot_predict(y_arma_res, start=1,end=N+10, ax=ax)
+plt.plot(y)
+legend = ax.legend(loc="upper left")
+plt.show()
+
+```
 
 
 
@@ -136,3 +162,4 @@ plt.show()
 
 
 
+![](../Pics/arma_predict.png)
