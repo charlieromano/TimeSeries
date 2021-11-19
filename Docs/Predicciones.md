@@ -110,7 +110,82 @@ plt.show()
 
 ![](../Pics/ciclic_trend.png)
 
-#### Modelo ARMA(2,1)
+
+
+### Modelo MA(1)
+
+```python
+# MA(1)
+N =1000
+b1 =0.25
+e_t0 = np.random.normal(0,1)
+e_t1 = np.random.normal(0,1)
+y = np.append(e_t0,b1*e_t0+e_t1)  # y1 = b1*e_t0+e_t1
+
+for i in range(N):
+   e_t0 = e_t1
+   e_t1 = np.random.normal(0,1)
+   y = np.append(y,b1*e_t0+e_t1)
+
+
+y.mean()
+y.std()
+plt.plot(y);plt.show()
+
+# Predict
+ma1 = ARIMA(y, order=(0, 0, 1))
+ma1_res = ma1.fit()
+print(ma1_res.summary())
+
+fig, ax = plt.subplots(figsize=(10, 8))
+fig = plot_predict(ma1_res, start=1,end=1010, ax=ax)
+plt.plot(y)
+legend = ax.legend(loc="upper left")
+plt.show()
+
+y_ma1=y
+```
+
+![](../Pics/ma_1_predict.png)
+
+### Modelo AR(2)
+
+```python
+N=1000
+a1=0.4
+a2=0.35
+x=np.arange(2)
+e_t=np.random.normal(0,1)
+y=np.append(x,a1*x[1]+a2*x[0]+e_t)
+
+for i in range(N):
+   e_t=np.random.normal(0,1)
+   y=np.append(y,a1*y[-1]+a2*y[-2]+e_t)
+
+
+y.mean()
+y.std()
+#plt.plot(y);plt.show()
+
+# Predict
+l=20
+ar2 = ARIMA(y, order=(2, 0, 0))
+ar2_res = ar2.fit()
+print(ar2_res.summary())
+
+fig, ax = plt.subplots(figsize=(10, 8))
+fig = plot_predict(ar2_res, start=0,end=N+l, ax=ax)
+plt.plot(y)
+legend = ax.legend(loc="upper left")
+plt.show()
+
+```
+
+![](../Pics/ar_2_predict.png)
+
+
+
+### Modelo ARMA(2,1)
 
 
 
@@ -163,3 +238,50 @@ plt.show()
 
 
 ![](../Pics/arma_predict.png)
+
+
+
+
+
+### Modelo ARIMA(2,1,1)
+
+```python
+#ARIMA
+
+N=10000
+a1=0.35
+a2=0.25
+b1 =-0.35
+
+x=np.arange(2)
+e_t=np.random.normal(0,1)
+y=np.append(x,a1*x[1]+a2*x[0]+e_t)
+
+for i in range(N):
+   e_0 = e_t
+   e_t=np.random.normal(0,1)
+   y=np.append(y,a1*y[-1]+a2*y[-2]+ b1*e_0 + e_t)
+
+t = np.arange(int(N*0.01), step=0.01)
+y=y[2:N+2]
+
+y = y+t
+y.mean()
+y.std()
+#plt.plot(y);plt.show()
+
+
+# Predict
+y_arma = ARIMA(y, order=(2, 1, 1), trend='t')
+y_arma_res = y_arma.fit()
+print(y_arma_res.summary())
+
+fig, ax = plt.subplots(figsize=(10, 8))
+fig = plot_predict(y_arma_res, start=1,end=N+10, ax=ax)
+plt.plot(y)
+legend = ax.legend(loc="upper left")
+plt.show()
+```
+
+![](/home/charlieromano/Downloads/TimeSeries/Pics/arima_predict.png)
+

@@ -35,6 +35,7 @@ fig = plot_predict(ar2_res, start=0,end=N+l, ax=ax)
 plt.plot(y)
 legend = ax.legend(loc="upper left")
 plt.show()
+
 ####################################################################
 
 
@@ -54,6 +55,7 @@ y.mean()
 y.std()
 plt.plot(y);plt.show()
 
+l=10
 ar1 = ARIMA(y, order=(1, 0, 0))
 ar1_res = ar1.fit()
 print(ar1_res.summary())
@@ -67,8 +69,8 @@ plt.show()
 
 ####################################################################
 # MA(1)
-N =10000
-b1 =0.5
+N =1000
+b1 =0.25
 e_t0 = np.random.normal(0,1)
 e_t1 = np.random.normal(0,1)
 y = np.append(e_t0,b1*e_t0+e_t1)  # y1 = b1*e_t0+e_t1
@@ -93,5 +95,77 @@ fig = plot_predict(ma1_res, start=1,end=1010, ax=ax)
 plt.plot(y)
 legend = ax.legend(loc="upper left")
 plt.show()
-####################################################################
 
+y_ma1=y
+####################################################################
+#ARMA
+
+N=10000
+a1=0.4
+a2=0.3
+b1 =-0.3
+
+x=np.arange(2)
+e_t=np.random.normal(0,1)
+y=np.append(x,a1*x[1]+a2*x[0]+e_t)
+
+for i in range(N):
+   e_0 = e_t
+   e_t=np.random.normal(0,1)
+   y=np.append(y,a1*y[-1]+a2*y[-2]+ b1*e_0 + e_t)
+
+
+y.mean()
+y.std()
+#plt.plot(y);plt.show()
+
+
+# Predict
+y_arma = ARIMA(y, order=(2, 0, 1))
+y_arma_res = y_arma.fit()
+print(y_arma_res.summary())
+
+fig, ax = plt.subplots(figsize=(10, 8))
+fig = plot_predict(y_arma_res, start=1,end=N+10, ax=ax)
+plt.plot(y)
+legend = ax.legend(loc="upper left")
+plt.show()
+
+
+
+####################################################################
+#ARIMA
+
+N=10000
+a1=0.35
+a2=0.25
+b1 =-0.35
+
+x=np.arange(2)
+e_t=np.random.normal(0,1)
+y=np.append(x,a1*x[1]+a2*x[0]+e_t)
+
+for i in range(N):
+   e_0 = e_t
+   e_t=np.random.normal(0,1)
+   y=np.append(y,a1*y[-1]+a2*y[-2]+ b1*e_0 + e_t)
+
+t = np.arange(int(N*0.01), step=0.01)
+y=y[2:N+2]
+
+y = y+t
+y.mean()
+y.std()
+#plt.plot(y);plt.show()
+
+
+# Predict
+y_arma = ARIMA(y, order=(2, 1, 1), trend='t')
+y_arma_res = y_arma.fit()
+print(y_arma_res.summary())
+
+fig, ax = plt.subplots(figsize=(10, 8))
+fig = plot_predict(y_arma_res, start=1,end=N+1000, ax=ax)
+plt.plot(y)
+legend = ax.legend(loc="upper left")
+plt.show()
