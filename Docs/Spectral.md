@@ -1,8 +1,8 @@
-Introducción al Análisis Espectral
+# Introducción al Análisis Espectral
 
 
 
-Análisis en el dominio del tiempo
+### Análisis en el dominio del tiempo
 
 
 
@@ -39,7 +39,7 @@ Y_t = A_0 + \sum_{j=1}^m (A_j\cos(2\pi f_j t) + B_j \sin(2\pi f_j t ))
 $$
 Con cuadrados mínimos ordinarios se puede ajustar los valores de los $A_j$ y $B_j$.
 
-Fourier
+#### Fourier
 
 Suponiendo que n es impar, esto es n=2k+1, se tiene que las frecuencias de la forma 1/n, 2/n, ..., k/n se denominan *frecuencias de Fourier*. Las variables predictoras del seno y coseno a tales frecuencias son ortogonales, y la estimación por cuadrados mínimos resulta simplemente:
 $$
@@ -54,7 +54,7 @@ El resultado de la serie de suma de cosenos y senos es general. Esto es, cualqui
 
 
 
-Periodograma
+#### Periodograma
 
 Para muestras de tamaño impar, el periodogram se define como:
 $$
@@ -72,6 +72,154 @@ $$
 $$
 Como conclusión, en cualquiera de los casos se tiene que para series largas habrá que estimar un número grande de parámetros y para esto se usa la transformada rápida de Fourier, o FFT.
 
+#### Ejemplos
+
+
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from numpy import pi as pi
+from numpy import sin as sin
+from numpy import cos as cos
+from scipy import signal
+
+# example 1a 
+N=1000
+f=50
+T=1/f
+t=np.arange(N)
+Phi=np.random.normal(0,1,N)
+X=sin(2*pi*f*t/N)
+Y=sin(2*pi*f*t/N + Phi)
+
+plt.plot(Phi)
+plt.plot(X)
+plt.plot(Y)
+plt.legend(['$\Phi$','$X_t$','$Y_t$'])
+plt.show()
+```
+
+
+
+![](../Pics/spectral_intro_timeseries_zoom.png)
+
+En la figura se puede observar la componente $X_t$ que corresponde a una onda senoidal, la componente de ruido blanco $\Phi$ y el proceso $Y_t$ que es una onda senoidal con fase aleatoria. 
+
+
+
+Si resolvemos el periodograma, podemos encontrar las frecuencias características del proceso.
+
+```python
+
+#F, Pxx_den = signal.periodogram(X,N)
+#plt.semilogy(F, Pxx_den)
+G, Pyy_den = signal.periodogram(Y,N)
+plt.plot(G, Pyy_den)
+#plt.legend(['$F(X)$','$F(Y)$'])
+plt.show()
+
+```
+
+![](../Pics/spectral_intro_timeseries_periodogram.png)
+
+Se puede observar el piso de ruido y una componente marcada en la frecuencia 50.
+
+En el repo hay más ejemplos.
+
+
+
 
 
 Análisis en el dominio de la frecuencia (análisis espectral)
+
+Usando notación de números complejos también se puede expresar la descomposición en serie de Fourier como:
+$$
+Y_t = \sum_{k=-N}^N c_ke^{j\omega k t }
+$$
+
+
+Ejemplo de señal modulada.
+
+![](../Pics/spectral_intro_timeseries_ej2.png)
+
+#### Densidad espectral de potencia
+
+Si la autocovarianza decrece rápido a medida que aumentan los retardos y se satisface que tienen energía finita, esto es:
+$$
+\sum_{k=-\infty}^{\infty}|C_k|<	\infty
+$$
+se puede definir la transformada de Fourier de la autocovarianza. La función definida entre $-1/2<f<1/2$ como sigue se denomina *densidad espectral de potencia*. 
+$$
+p(f) = \sum_{k=-\infty}^\infty C_ke^{-2\pi jkf}
+$$
+Se puede ver que:
+$$
+\begin{align}
+p(f) &= \sum_{k=-\infty}^\infty C_ke^{-2\pi jkf}\\
+&=\sum_{k=-\infty}^\infty \cos(2\pi kf) - j\sum_{k=-\infty}^\infty \sin(2\pi kf) \\
+&=\sum_{k=-\infty}^\infty \cos(2\pi kf) \\
+&=C_0+2\sum_{k=1}^\infty \cos(2\pi kf) 
+\end{align}
+$$
+Entonces una serie de tiempo se puede expresar en función de componentes trigonométricas y la densidad espectral de potencia es una representación en esos términos. Pero por otro lado, podemos partir de una densidad espectral y querer encontrar la función de autocovarianza, que se puede calcular a partir de la transformada inversa de Fourier:
+$$
+C_k  = \int_{-1/2}^{1/2}p(f)e^{2\pi jkf} = \int_{-1/2}^{1/2}p(f)\cos(2\pi kf)df
+$$
+
+
+
+
+Ejemplo 1: White noise
+
+$C_0=\sigma^2$ $C_k=0$ para $k\neq 0$
+$$
+p(f) = \sum_{k=-\infty}^\infty \cos(2\pi kf) = C_0 = \sigma^2\\
+$$
+Ejemplo 2: AR(1)
+$$
+\begin{align}
+Y_t &= a_1Y_{t-1}+e_t \\
+\\
+C_k &= \sigma^2\frac{a^{|k|}}{1-a^2}\\
+\\
+p(f) &= \frac{\sigma^2}{|1-ae^{2\pi jf}|^2}\\
+&= \frac{\sigma^2}{1-2a\cos2\pi f+a^2}\\
+\\a&=0.9
+\end{align}
+$$
+
+
+Ejemplo 3: AR(2)
+$$
+\begin{align}
+a &= -0.9\\
+\\
+Y_t &= a_1Y_{t-1}+a_2Y_{t-2}+e_t \\
+\\
+R_1 &= \frac{a_1}{1-a_2}\\
+\\
+R_k &= a_1R_{k-1}+a_2R_{k-2}\\
+\\
+p(f)&=\frac{\sigma^2}{|1-a_1e^{-2\pi jf}-a_2e^{-4\pi jf}|^2}\\
+&= \frac{\sigma^2}{|1-2a_1(1-a_2)\cos 2\pi f-2a_2\cos4\pi f + a_1^2 + a_2^2}\\
+\\
+a_1 &= 1.558\\
+\\
+a_2&=-0.81
+\end{align}
+$$
+Ejemplo 4: ARMA(1,1), ARMA(p,q)
+
+
+$$
+\begin{align}
+Y_t &= a_1Y_{t-1} + b_1 e_{t-1}\\
+\\
+p(f) &= \frac{1+b_1^2-2b_1\cos(2\pi f)}{1+a_1^2-2a_1\cos(2\pi f)}\sigma_e^2\\
+\end{align}
+$$
+para el caso general:
+$$
+p(f) = \left|\frac{\theta(e^{-2\pi jf})}{\phi (e^{-2\pi jf})}\right|^2\sigma_e^2
+$$
