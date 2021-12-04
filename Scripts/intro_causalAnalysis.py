@@ -53,9 +53,7 @@ print(post_period_df.describe())
 
 
 ci = CausalImpact(df['close'], pre_period, post_period)
-##########################
-# DESDE ACA FALTA ARREGLAR
-##########################
+
 ci.plot(figsize=(12, 6))
 ci.plot(panels=['original', 'pointwise'], figsize=(12, 8))
 print(ci.summary())
