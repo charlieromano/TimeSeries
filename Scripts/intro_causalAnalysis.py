@@ -53,18 +53,24 @@ print(post_period_df.describe())
 
 
 ci = CausalImpact(df['close'], pre_period, post_period)
-##########################
-# DESDE ACA FALTA ARREGLAR
-#########################
-ci#n.plot(figsize=(12, 6))
-ci.plot(panels=['original', 'pointwise'], figsize=(12, 8))
-print(ci.summary())
+# <<<<<<< HEAD
+# ##########################
+# # DESDE ACA FALTA ARREGLAR
+# #########################
+# ci#n.plot(figsize=(12, 6))
+# =======
 
-ci.trained_model.params
-print(ci.trained_model.summary())
-_ = ci.trained_model.plot_diagnostics(figsize=(14,6))
+# ci.plot(figsize=(12, 6))
+# >>>>>>> bdb03bf2f7c264611746c7c34ad6e7e85bf30137
+# ci.plot(panels=['original', 'pointwise'], figsize=(12, 8))
+# print(ci.summary())
 
-ci.trained_model.specification
+# ci.trained_model.params
+# print(ci.trained_model.summary())
+# _ = ci.trained_model.plot_diagnostics(figsize=(14,6))
 
-df['close'].plot(figsize=(12,4))
+# ci.trained_model.specification
 
+# df['close'].plot(figsize=(12,4))
+
+# >>>>>>> 1935a5e774190cfb61c4f69560f1222e1474e001
