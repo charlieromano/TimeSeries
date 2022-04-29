@@ -1,0 +1,59 @@
+Variables aleatorias
+Gráficos
+	Y vs X
+	histogramas
+Tablas descriptivas
+Bases de tiempo
+
+criterios de bondad de ajuste
+ Kullback-Leibler
+ Máxima verosimilitud
+ Criterio de información de Akaike (AIC)
+ Criterio de información Bayesiano (BIC)
+
+ Modelos (parte I)
+  Proceso lineal general
+  Modelo de promedios móviles
+   MA(1)
+   MA(q)
+  Modelo autorregresivo
+   AR(1)
+   AR(p)
+  Modelo ARMA (p,q)
+
+ Estimación de parámetros
+ 	Ecuaciones de Yule-Walker
+ 	log-likelihood
+ 	cuadrados mínimos
+
+
+Modelos de estados (parte II)
+
+cuadrados mínimos--> Tendencia
+
+Modelos de descomposición
+
+
+Trabajo Práctico
+
+1: * Graficar una serie
+	* Explicar observaciones
+
+2: 	* descomponer una serie 
+	* aplicar los modelos vistos en clase
+ 		* para la tendencia usar cuadrados mínimos y expresar los coeficientes
+ 		* para la componente cíclica usar análisis espectral y expresar las frecuencias principales
+		* para la componente estacional usar ARIMA
+		* para la componente de error obtener r, C
+
+3: * Predicción
+
+
+
+
+Clase 4: Tendencia y estacionalidad
+
+    ARIMA (cap5)
+    parámetros ARIMA (cap 6-7): ejemplos de función de autocorrelacion y autocorrelación parcial
+    pendientes: objeto de resultados ARIMA(cap8 )
+    (S)ARIMA: capitulo 10
