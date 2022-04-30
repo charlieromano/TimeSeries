@@ -1,0 +1,17 @@
+$$
+\begin{align}
+X(t,\Omega) &= \{X(t, \omega_i)|\omega_i \in \Omega\} = \{x_1(t), x_2(t), ...\} \\
+\\
+X(t,\omega_i) &= x_i(t) \\
+\\
+X(t_0,\Omega) &= \{X(t, \omega_i)|\omega_i \in \Omega\} = \{x_1(t_0), x_2(t_0), ...\} \\
+\\
+X(t_0,\omega_i) &= x_i(t_0) \\
+
+\end{align}
+$$
+
+
+$$
+
+$$
