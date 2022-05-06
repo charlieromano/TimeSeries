@@ -2,11 +2,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-inputfile = "../Datasets/S1MME_week43.csv"
+inputfile = "../Datasets/S1MME_week44.csv"
 df = pd.read_csv(inputfile)
+df = df.loc[df.NENAME=='MME1BEL']
 sig=df.S1_mode_combined_attach_request_times_SEQ
 
-N=24 #hours
+N=24 #hoursCLI
 sample=4 #sampled period number
 
 dataframe = pd.Series(sig)
