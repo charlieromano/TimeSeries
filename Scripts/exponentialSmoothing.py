@@ -1,56 +1,3 @@
-$$
-\begin{align}
-X(t,\Omega) &= \{X(t, \omega_i)|\omega_i \in \Omega\} = \{x_1(t), x_2(t), ...\} \\
-\\
-X(t,\omega_i) &= x_i(t) \\
-\\
-X(t_0,\Omega) &= \{X(t, \omega_i)|\omega_i \in \Omega\} = \{x_1(t_0), x_2(t_0), ...\} \\
-\\
-X(t_0,\omega_i) &= x_i(t_0) \\
-
-\end{align}
-$$
-
-
-$$
-
-$$
-
-
-
-
-$$
-y'_t=y_t-y_{t-1}\\
-$$
-Si quiero eliminar una tendencia anual, puedo calcular la diferencia de orden 12 (meses):
-$$
-y'_t=y_t-y_{t-12}\\
-\\
-y''_t=y'_t-y'_{t-1}=y_t-y_{t-1}-y_{t-12}+y_{t-12-1}\\
-\\
-By_t = y_{t-1}\\
-\\
-B^{12}y_t = y_{t-12}\\
-\\
-y'_t = y_t-By_t = (1-B)y_t\\
-\\
-y''_t=(1-B)(1-B^{12})y_t\\
-$$
-
-Exponential Smoothing
-$$
-\hat{y}_{t+1|t} = \alpha y_t + \alpha(1-\alpha)y_{t-1}+\alpha(1-\alpha)^2y_{t-2}+...
-$$
-donde alpha es el parámetro de suavizado que se encuentra en el intervalo (0,1). Se requiere un valor inicial para t01.
-
-Usando notación de componentes, y denotando el valor inicial como n_0 tenemos que:
-$$
-\hat{y}_{t+h|t} = n_t\\
-\\
-n_t=\alpha y_t + \alpha(1-\alpha)n_{t-1}
-$$
-
-```python
 import pandas as pd
 import matplotlib.pyplot as plt
 from statsmodels.tsa.api import SimpleExpSmoothing
@@ -70,14 +17,17 @@ ax = data.plot(marker='o', color='black', figsize=(12,8), legend=True)
 ins_cast1.plot(marker='+', ax=ax, color='blue', legend=True)
 ins1.fittedvalues.plot(marker='+', ax=ax, color='blue')
 
-plt.show()
+#plt.show()
 
 #Second Instance
+ins1 = SimpleExpSmoothing(data).fit(smoothing_level=0.2,optimized=False)
+ins_cast1 = ins1.forecast(3).rename('alpha=0.2')
+
 ins2 = SimpleExpSmoothing(data).fit(smoothing_level=0.8,optimized=False)
 ins_cast2 = ins2.forecast(3).rename('alpha=0.8')
 
 #Third Instance
-ins3 = SimpleExpSmoothing(data).fit()
+ins3 = SimpleExpSmoothing(data).fit(smoothing_level=0.95,optimized=False)
 ins_cast3 = ins3.forecast(3).rename('alpha=%s'%ins3.model.params['smoothing_level'])
 
 #After creating model we will visualize the plot
@@ -85,23 +35,17 @@ ax = data.plot(marker='o', color='black', figsize=(12,8), legend=True)
 
 ins_cast1.plot(marker='+', ax=ax, color='blue', legend=True)
 ins1.fittedvalues.plot(marker='+', ax=ax, color='blue')
-
 ins_cast2.plot(marker='o', ax=ax, color='red', legend=True)
 ins2.fittedvalues.plot(marker='o', ax=ax, color='red')
-
 ins_cast3.plot(marker='*', ax=ax, color='green', legend=True)
 ins3.fittedvalues.plot(marker='*', ax=ax, color='green')
 
+plt.legend(['original','alpha=0.2','alpha=0.8','alpha=0.95'])
 plt.show()
-```
 
 
 
 
-
-
-
-```python
 #Holt lineal
 import os
 import numpy as np
@@ -111,21 +55,21 @@ from statsmodels.tsa.api import SimpleExpSmoothing
 from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing, Holt
 
 data = [
-    17.5534,
-    21.86,
-    23.8866,
-    26.9293,
-    26.8885,
-    28.8314,
-    30.0751,
-    30.9535,
-    30.1857,
-    31.5797,
-    32.5776,
-    33.4774,
-    39.0216,
-    41.3864,
-    41.5966,
+   17.5534,
+   21.86,
+   23.8866,
+   26.9293,
+   26.8885,
+   28.8314,
+   30.0751,
+   30.9535,
+   30.1857,
+   31.5797,
+   32.5776,
+   33.4774,
+   39.0216,
+   41.3864,
+   41.5966,
 ]
 index = pd.date_range(start="1990", end="2005", freq="A")
 air = pd.Series(data, index)
@@ -148,9 +92,8 @@ plt.plot(fit3.fittedvalues, color="green")
 plt.legend([line1, line2, line3], [fcast1.name, fcast2.name, fcast3.name])
 plt.show()
 
-```
 
-```python
+
 #Holt-Winters Seasonal
 
 data = [
@@ -213,6 +156,3 @@ fit2.forecast(8).rename("Holt-Winters (add-mul-seasonal)").plot(
 )
 
 plt.show()
-
-```
-
