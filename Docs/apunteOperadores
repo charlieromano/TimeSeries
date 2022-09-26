@@ -1,0 +1,107 @@
+$$
+BY_t = Y_{t-1}\\
+
+B^2Y_t = Y_{t-2}\\
+...\\
+
+B^kY_t = Y_{t-k}
+$$
+
+
+$$
+\begin{split}
+\nabla Y_t &= Y_t - Y_{t-1}\\
+\\
+\nabla²Y_t &= \nabla(\nabla Y_t)\\
+&=\nabla(Y_t-Y_{t-1})\\
+&=Y_{t-1}-Y_{t-2}\\
+\end{split}
+$$
+
+$$
+\begin{split}
+B^kY_t &= B_kY_t\\
+\\
+B^k_sY_t&=B^{ks}Y_t\\
+&=Y_{t-ks}\\
+\\
+B^{k}_{12}Y_t&=Y_{t-k\cdot12}
+\end{split}
+$$
+
+$$
+\begin{split}
+(1-B)Y_t &= Y_t-Y_{t-1}\\
+\\
+(1-B)^2Y_t &= (1-2B+B^2)Y_t\\
+&= Y_t-2Y_{t-1}+Y_{t-2}
+\end{split}
+$$
+
+$$
+\nabla^kY_t = (1-B)^kY_t\\
+\nabla^k_sY_t = (1-B_s)^kY_t
+$$
+
+
+
+## AR(p)
+
+
+$$
+\begin{split}
+e_t &= Y_t - \sum_{k=1}^p a_kY_{t-k}\\
+\\
+e_t &= (1-\sum_{k=1}^p a_kB^k)Y_t \\
+\\
+e_t &= \phi(B)Y_t
+\end{split}
+$$
+
+## MA(q)
+
+$$
+\begin{split}
+Y_t &= e_t - \sum_{k=1}^p b_ke_{t-k}\\
+\\
+Y_t &= (1-\sum_{k=1}^p b_kB^k)e_t \\
+\\
+Y_t &= \theta(B)e_t
+\end{split}
+$$
+
+
+
+## ARMA(p,q)
+
+$$
+\begin{split}
+Y_t &= \theta(B)e_t\\
+\\
+e_t &= \phi(B)Y_t\\
+\\
+\phi(B)Y_t &= \theta(B)e_t\\
+\\
+a(B)Y_t &= b(B)e_t
+\end{split}
+$$
+
+## ARIMA(p,d,q)
+
+$$
+\begin{split}
+\nabla^dY_t &= W_t \\
+\\
+W_t&: ARMA(p,q)\\
+\\
+
+\nabla^d_sY_t&=(1-B_s)^dY_t
+\end{split}
+$$
+
+## SARIMA(p,d,q)(P,D,Q)
+
+$$
+
+$$
+
