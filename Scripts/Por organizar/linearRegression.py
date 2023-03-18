@@ -18,11 +18,12 @@ df1=df1[['fechaHora','ultimoPrecio']]
 # Linear Regression
 
 df=df1
+df = df.iloc[np.where(df.ultimoPrecio != 0)[0]]
 nsample = len(df)
-x = pd.to_numeric(pd(df1['fechaHora']))
-X=x #X = np.column_stack(x)
+x = pd.to_numeric(df.fechaHora)
+X=x[::-1]
 X = sm.add_constant(X)
-y = np.array(df1['ultimoPrecio'])
+y = np.array(df['ultimoPrecio'])[::-1]
 model = sm.OLS(y, X)
 res = model.fit()
 print(res.summary())
@@ -32,8 +33,8 @@ prstd, iv_l, iv_u = wls_prediction_std(res)
 fig, ax = plt.subplots(figsize=(8,6))
 ax.plot(x, y, 'o', label="data")
 ax.plot(x, res.fittedvalues, 'r--.', label="OLS")
-ax.plot(x, iv_u, 'r--')
-ax.plot(x, iv_l, 'r--')
+#ax.plot(x, iv_u, 'r--')
+#ax.plot(x, iv_l, 'r--')
 ax.legend(loc='best');
 plt.show()
 
@@ -72,5 +73,5 @@ ax.plot(x, res.fittedvalues, 'r--.', label="OLS")
 ax.plot(x, iv_u, 'r--')
 ax.plot(x, iv_l, 'r--')
 ax.legend(loc='best');
-
+plt.show()
 

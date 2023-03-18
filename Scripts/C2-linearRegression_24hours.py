@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-inputfile = "../Datasets/S1MME_week44.csv"
+inputfile = "../../Datasets/S1MME_week44.csv"
 df = pd.read_csv(inputfile)
 df = df.loc[df.NENAME=='MME1BEL']
 sig=df.S1_mode_combined_attach_request_times_SEQ
@@ -23,7 +23,7 @@ betas=data.mean(axis=0)
 plt.plot(betas)
 plt.plot(data[sample,:])
 plt.plot(data[sample,:]-betas)
-plt.legend(['betas','data','data-betas'])
+plt.legend(['betas','data','error'])
 plt.show()
 
 #####################################################################
