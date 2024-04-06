@@ -17,7 +17,7 @@ ax = data.plot(marker='o', color='black', figsize=(12,8), legend=True)
 ins_cast1.plot(marker='+', ax=ax, color='blue', legend=True)
 ins1.fittedvalues.plot(marker='+', ax=ax, color='blue')
 
-#plt.show()
+plt.show()
 
 #Second Instance
 ins1 = SimpleExpSmoothing(data).fit(smoothing_level=0.2,optimized=False)
