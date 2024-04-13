@@ -163,4 +163,4 @@ def sample(model, out_len, start='hey'):
     return ''.join(chars)
 
 
-sample(model, 15, 'good')
+sample(model, 15, 'fine')
